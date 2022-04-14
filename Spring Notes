@@ -1,0 +1,665 @@
+TIP : Work with Maven projects is good for dependency updations.
+
+Refer project : "SpringTelusko" // MVN project
+pom.xml, classes[App.java, Car.java, Bike.java], interface[Vehicle.java], abc.xml[bean file]
+
+Steps:
+	1) create a new Maven Project
+	2) select quickstart
+	3) in xml include dependency of spring framework
+
+
+
+
+
+#PROBLEM : We need either bike or car. but for that in "App.java" file we have to change object & constructor on both sides.
+
+"pom.xml" file : 
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.telusko</groupId>
+  <artifactId>spring</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>spring</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    
+    <!-- THIS IS ADDED FOR SPRING FRAMEWORK FROM GOOGLE -->
+	<dependency>
+    	<groupId>org.springframework</groupId>
+    	<artifactId>spring-context</artifactId>
+    	<version>5.3.18</version>
+	</dependency>
+
+  </dependencies>
+</project>
+
+
+"Bike.java" file
+package com.telusko.spring;
+public class Bike {
+	public void drive() {
+		System.out.println("You are on 2 wheeler...");
+	}
+}
+
+"Car.java" file
+package com.telusko.spring;
+public class Car {
+	public void drive() {
+		System.out.println("You are in 4 wheeler...");
+	}
+}
+
+
+"App.java" file
+package com.telusko.spring;
+public class App {
+	public static void main(String[] args) {		
+		// for Car
+		/*
+		Car obj = new Car(); 
+		obj.drive();	// o/p : You are in 4 wheeler...
+		*/
+
+		// for Bike
+		Bike obj = new Bike();
+		obj.drive();	// o/p : You are on 2 wheeler...
+	}
+}
+
+
+
+
+
+# Aam Solution : create an interface Vehicle so, now you have to just change right side(making new object(constructor) side) in "App.java" file
+
+"pom.xml" file : // add spring dependency
+
+"Vehicle.java" file
+package com.telusko.spring;
+public interface Vehicle {
+	void drive();
+}
+
+"Bike.java" file
+package com.telusko.spring;
+public class Bike implements Vehicle {
+	public void drive() {
+		System.out.println("You are on 2 wheeler...");
+	}
+}
+
+"Car.java" file
+package com.telusko.spring;
+public class Car implements Vehicle {
+	public void drive() {
+		System.out.println("You are in 4 wheeler...");
+	}
+}
+
+
+"App.java" file
+package com.telusko.spring;
+public class App {
+	public static void main(String[] args) {		
+		// for Car
+		/*
+		Vehicle obj = new Car(); 	// only right side we are changing
+		obj.drive();	// o/p : You are in 4 wheeler...
+		*/
+
+		// for Bike
+		Vehicle obj = new Bike();
+		obj.drive();	// o/p : You are on 2 wheeler...
+	}
+}
+
+
+
+
+
+
+but, why we are changing even right side?
+
+
+
+
+# Menots Solution : Spring-framework(make an xml file for configuration of car & bike)
+
+"pom.xml" file : //add spring dependency
+
+"bean.xml" file :
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<bean id="vehicle" class="com.telusko.spring.Bike"></bean>
+</beans>
+
+NOTE: for <beans> we have to give definitions as i wrote above(you can google it.)
+
+"Vehicle.java" file : // No change
+
+"Car.java" file : // no change
+
+"Bike.java" file : // no change
+
+"App.java" file :
+package com.telusko.spring;
+import org.springframework.context.ApplicationContext; // required to use getBean()
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+public class App {
+	public static void main(String[] args) {
+		ApplicationContext context = new ClassPathXmlApplicationContext("bean.xml");
+		Vehicle obj = (Vehicle) context.getBean("vehicle"); 
+		// EITHER getBean() could be used from BeanFactory OR ApplicationContext
+		/* ApplicationContext is a super set of BeanFactory. for small projects we can use BeanFactory. but here we'll practice not for small. so, we'll use ApplicationContext. */
+		obj.drive();
+	}
+}
+
+Output:
+You are on 2 wheeler...
+
+// It's based on "bean.xml" file.
+// As we mentioned class="com.telusko.spring.Bike", so, o/p will be based on Bike class
+
+
+
+
+
+
+# Advantages:
+	=> We don't have to make change in "App.java" file.
+	=> We are just changing class attribute in "bean.xml" file.
+	
+	# MAIN BIG ADVANTAGE:
+		=> if we change anything "App.java" file, then "App.java" must be re-compiled.
+		=> but, now we are changing "bean.xml" instead of "App.java".
+
+
+
+
+# Configuration can be done by 3 ways :
+	1) XML Config. (Which we did)
+	2) Annotation based Config.
+	3) JAVA Config.
+
+
+
+Project reference : "SpringTeluskoAnnotationConf"
+# Annotation based Configuration
+"pom.xml" file : //add spring dependency
+
+"bean.xml" file :
+in <beans> tag add following:
+	1) xmlns:context="http://www.springframework.org/schema/context"
+& in xsi:schemaLocation add following links:
+	1) http://www.springframework.org/schema/context
+	2) http://www.springframework.org/schema/context/spring-context.xsd
+
+"Vehicle.java" file : // No change
+
+"Car.java" file : // add @Component
+package com.telusko.SpringTeluskoAnnotationConf;
+import org.springframework.stereotype.Component; // import for @Component
+@Component
+public class Car implements Vehicle {
+	public void drive() {
+		System.out.println("You are in 4 wheeler...");
+	}
+}
+
+
+"Bike.java" file : // add @Component
+package com.telusko.SpringTeluskoAnnotationConf;
+import org.springframework.stereotype.Component; // import for @Component
+@Component
+public class Bike implements Vehicle {
+	public void drive() {
+		System.out.println("You are on 2 wheeler...");
+	}
+}
+
+
+"App.java" file :
+package com.telusko.SpringTeluskoAnnotationConf;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+public class App {
+	public static void main(String[] args) {
+		ApplicationContext context = new ClassPathXmlApplicationContext("bean.xml");
+		Vehicle obj = (Vehicle) context.getBean("bike"); // write bike instead of Bike OR car instead of Car
+		obj.drive();
+	}
+}
+
+
+
+
+
+
+
+# add property of tyre in vehicles using SETTER method
+Project refer : SpringTeluskoPropertyTyre
+
+"pom.xml" file : // add spring dependency
+
+create new file "Tyre.java" :
+package com.telusko.SpringTeluskoPropertyTyre;
+public class Tyre {
+	private String brand;
+	public String getBrand() {
+		return brand;
+	}
+	public void setBrand(String brand) {
+		this.brand = brand;
+	}
+	@Override
+	public String toString() {
+		return "Tyre [brand=" + brand + "]";
+	}
+}
+
+"bean.xml" file :
+=> add following in <beans> :
+	<bean id="tyre" class="com.telusko.SpringTeluskoPropertyTyre.Tyre">
+		<property name="brand" value="MRF"></property>
+	</bean>
+
+"Vehicle.java", "Car.java", "Bike.java" files not required
+
+"App.java" file :
+package com.telusko.SpringTeluskoPropertyTyre;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+public class App {
+	public static void main(String[] args) {
+		ApplicationContext context = new ClassPathXmlApplicationContext("bean.xml");
+//		Vehicle obj = (Vehicle) context.getBean("bike");
+//		obj.drive();
+		Tyre t = (Tyre) context.getBean("tyre");
+		System.out.println(t);
+	}
+}
+
+O/P:
+Tyre [brand=MRF]
+
+
+=> to change brand just change bean.xml <property value="CEAT_tyres">
+=> whenever we are using <property value="">, we are actually using setter method[setBrand(String brand)].
+=> we can not assign using only setter(), we can also assign using constructor.
+=> whenever we use setter() it's called "SETTER INJECTION"
+=> whenever we use constructor() it's called "CONSTRUCTOR INJECTION"
+=> how to use Constructor Injection? 
+
+
+
+
+Project refer : SpringTeluskoPropertyTyreUsingConstructor
+# add property of tyre in vehicles using CONSTRUCTOR INJECTION
+
+"pom.xml" file: // add spring dependency
+
+"App.java" file : // no change
+
+"Tyre.java" file : // add constructor using source as following
+// GETTER-SETTER no more needed
+public Tyre(String brand) {
+		super();
+		this.brand = brand;
+	}
+
+"bean.xml" file : // we can't set constructor property using <property>
+// add following in <bean>
+<constructor-arg value="CEAT"></constructor-arg>
+
+
+
+
+
+
+
+Project reference : SpringTelusko5AutowiredAnnotation
+# AutowiredAnnotations
+"pom.xml" file : //add spring dependency
+
+"bean1.xml" file : //No Injections/config. required
+
+"bean2.xml" file : // manually adding property for car
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans.xsd 
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+	<context:component-scan base-package="com.telusko.SpringTelusko5AutowiredAnnotation"></context:component-scan>
+	<bean id="tyremrf" class="com.telusko.SpringTelusko5AutowiredAnnotation.TyreMRF">
+		<property name="tyre" value="You're using MRF tyre..."></property>
+	</bean>
+</beans>
+
+"TyreCEAT.java" file : // only toString() required...
+
+"TyreMRF.java" file : // add getter/setter and toString() for tyre
+package com.telusko.SpringTelusko5AutowiredAnnotation;
+public class TyreMRF {
+	private String tyre;
+	public String getTyre() {
+		return tyre;
+	}
+	public void setTyre(String tyre) {
+		this.tyre = tyre;
+	}
+	@Override
+	public String toString() {
+		return " " + tyre;
+	}
+}
+
+
+"Vehicle.java" file : //no change
+
+"Car.java" file : 
+package com.telusko.SpringTelusko5AutowiredAnnotation;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.stereotype.Component; // import for @Component
+// not using @Autowired here. I'll do manual configuration in bean2.xml file for adding property.
+// see the difference
+@Component
+public class Car implements Vehicle {
+	public void drive() {
+		BeanFactory factory = new ClassPathXmlApplicationContext("bean2.xml");
+		TyreMRF tyreMRF = (TyreMRF) factory.getBean("tyremrf");
+		System.out.println("You are in 4 wheeler..." + tyreMRF + "(using XML configuration)");
+	}
+}
+
+
+
+"Bike.java" file : //Create Tyre obj & GETTER/SETTER for it and make Tyre @Autowired
+package com.telusko.SpringTelusko5AutowiredAnnotation;
+import org.springframework.beans.factory.annotation.Autowired; // import for @Autowired
+import org.springframework.stereotype.Component;
+// Using @Autowired Annotation for adding the property "You're using CEAT tyre..."
+// No XML configuration required + No <property> tag required...
+@Component
+public class Bike implements Vehicle {
+	@Autowired
+	private TyreCEAT tyreCEAT;
+	public TyreCEAT getTyreCEAT() {
+		return tyreCEAT;
+	}
+	public void setTyreCEAT(TyreCEAT tyreCEAT) {
+		this.tyreCEAT = tyreCEAT;
+	}
+	public void drive() {
+		System.out.println("You are on 2 wheeler..." + tyreCEAT + "(using @Autowired Annotation to add property)");
+	}
+}
+
+
+"App.java" file : // create Bike obj for getBean()
+package com.telusko.SpringTelusko5AutowiredAnnotation;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+public class App {
+	public static void main(String[] args) {
+		ApplicationContext context = new ClassPathXmlApplicationContext("bean1.xml");
+		// manual #AamZindagi
+		Car c = (Car) context.getBean("car");
+		c.drive();
+		// using @Autowired
+		Bike b = (Bike) context.getBean("bike"); // for Bike we added
+		// now for bike we have to add .xml config.
+		// but, we can use @Autowired instead in "Bike.java" file
+		b.drive();
+		}
+}
+
+
+
+
+@Autowire is for adding property.
+	=> it finds BEAN on basis of return type.
+@Component is for configuration.
+	=> for this we have to add following tag:
+			<context:component-scan base-package="PATH.OF.YOUR.PROJECT"></context:component-scan>
+
+
+
+
+
+
+
+
+
+3) JAVA Annotation based Configurations
+refer: "SpringTelusko6JAVAappConf" project.
+"pom.xml" file : // add spring dependency
+
+"App.java" file :
+package com.telusko.SpringTelusko6JAVAappConf;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+// JAVA Annotation instead of XML configuration 
+public class App {
+	public static void main(String[] args) {
+		/*
+		 * Samsung s7 = new Samsung(); s7.config(); Aam zindagi
+		 */
+		ApplicationContext factory = new AnnotationConfigApplicationContext(BeanJAVAconf.class);
+		// for JAVA Annotation Configuration
+		// NOTE : in JAVA Annotation, don't put double inverted comma("").
+		Samsung s7 = (Samsung) factory.getBean(Samsung.class); // no ""
+		s7.config();
+	}
+}
+
+"BeanJAVAconf.java" file :
+package com.telusko.SpringTelusko6JAVAappConf;
+import org.springframework.context.annotation.Bean; // require for @Bean
+import org.springframework.context.annotation.Configuration; // require for @Configuration
+@Configuration // now we can say it's a conf file just like bean.xml
+public class BeanJAVAconf {
+	@Bean // now it became BEAN
+	public Samsung getPhone() {
+		return new Samsung();
+	}
+	@Bean
+	public MobileProcessor getProcessor() {
+		// linkage through @Autowired & matched bcz of return type is MobileProcessor
+		return new Snapdragon();
+	}
+}
+
+"Samsung.java" file : 
+package com.telusko.SpringTelusko6JAVAappConf;
+import org.springframework.beans.factory.annotation.Autowired;
+public class Samsung {
+	@Autowired // it works on basis of return type. like here is MobileProcessor Type. then in
+				// Bean file ther must be MobileProcessor return typed method.
+	MobileProcessor cpu; // cpu is just a variable not an object
+	// after including @Autowire it will become object throgh BeanJAVAconf.java
+	public MobileProcessor getCpu() {
+		return cpu;
+	}
+	public void setCpu(MobileProcessor cpu) {
+		this.cpu = cpu;
+	}
+	public void config() {
+		System.out.println("Octa Core, 4 GB RAM, 12 MP Camera");
+		cpu.process();
+	}
+}
+
+"MobileProcessor.java"(interface) file : 
+package com.telusko.SpringTelusko6JAVAappConf;
+public interface MobileProcessor {
+	void process();
+}
+
+"Snapdragon.java" file : 
+package com.telusko.SpringTelusko6JAVAappConf;
+public class Snapdragon implements MobileProcessor {
+	public void process() {
+		System.out.println("World best CPU");
+	}
+}
+
+O/P :
+Octa Core, 4 GB RAM, 12 MP Camera
+World best CPU
+
+
+
+
+
+
+
+# WHAT IF WE DON'T NEED TO WRITE @Bean ? => Yes it's possible...
+
+
+
+
+
+Refer : "SpringTelusko7JAVAconfWithComponentScan" project
+"pom.xml" file : // add spring dependency
+
+"App.java" file : // no change
+
+"BeanJAVAconf.java" file : // remove @Bean methods & add @ComponentScan(basePackages = "PATH.OF.YOUR.PROJECT")
+package com.telusko.SpringTelusko7JAVAconfWithComponentScan;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration; // require for @Configuration
+@Configuration
+@ComponentScan(basePackages = "com.telusko.SpringTelusko7JAVAconfWithComponentScan")
+// for not using @Bean methods
+public class BeanJAVAconf { }
+
+"Samsung.java" file : // add @Component before class declaration
+package com.telusko.SpringTelusko7JAVAconfWithComponentScan;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+@Component
+public class Samsung {
+	@Autowired
+	MobileProcessor cpu;
+	public MobileProcessor getCpu() {
+		return cpu;
+	}
+	public void setCpu(MobileProcessor cpu) {
+		this.cpu = cpu;
+	}
+	public void config() {
+		System.out.println("Octa Core, 4 GB RAM, 12 MP Camera");
+		cpu.process();
+	}
+}
+
+"MobileProcessor.java" file : // No change
+
+"Snapdragon.java" file : // add @Component
+package com.telusko.SpringTelusko7JAVAconfWithComponentScan;
+import org.springframework.stereotype.Component;
+@Component
+public class Snapdragon implements MobileProcessor {
+	public void process() {
+		System.out.println("World best CPU");
+	}
+}
+
+O/P :
+Octa Core, 4 GB RAM, 12 MP Camera
+World best CPU
+
+
+
+# Advantage of @Component :
+	=> is don't need to create object in Bean file like,
+				return new Snapdragon();
+
+
+# how @Component refers it's class with the help of id,
+	like in XML files we mention something like this,
+		<bean id="tyre" class="PATH.OF.PROJECT.CLASS"></bean>
+	=> so, @Component also works same.
+	=> By default it doesn't require any id.
+	=> By default it's given NON-QUALIFIED & same as de-capitalized class name.
+			for example,
+				- for class Tyre it's id="tyre"
+				- for class Snapdragon it's id="snapdragon"
+				- for class Samsung, id="samsung"
+				- for class TyreMRF, id="tyreMRF"
+	=> But, where can we see id???
+			- for default name don't require to mention id.
+					but, still if we want to write then we can write as following,
+							@Component("samsung") 	// just like this
+			- we also can provide differnt name for it.
+					like,
+							@Component("mySamsung") 
+
+	# now question is why this id is needed?
+		ANS => to identify it's bean.
+
+	for example, we have 2 processors Snapdragon & MediaTek.
+	=> both implements MobileProcessor.process() method
+	=> so, now any phone can have only one of the processors(Either Snapdragon OR MediaTek).
+	=> so, how it'll work?
+	=> for this @Qualifier and @Primary annotations needed.
+
+# WHAT IS @Primary ANNOTATION ?
+		=> if you declare @Primary before declaration of class it'll be consider as your Bean class.
+				for example: 
+					=> if @Primary is written before MediaTek then o/p shows MediaTek's o/p.
+
+# WHAT IS @Qualifier ANNOTATION ?
+		=> This works same as @Primary 
+		=> but, @Qualifier Annotation is used before creating it's object.
+				for example:
+					=> it'll be written in Samsung.java instead of Snapdragon OR MediaTek.
+					=> if @Qualifier("mediaTek") is written then it'll execute MediaTek.class
+
+
+
+
+
+
+
+##### TO UNDERSTAND THIS REFER "SpringTelusko8JAVAconfPrimaryAndQualifier" PROJECT ######
+
+"pom.xml" file : // add spring dependency
+
+"app.java" file : // no change
+
+"BeanJAVAconf.java" file : // no change
+
+"Samsung.java" file : // see changes for @Qualifier by yourself
+
+"MobileProcessor.java" file : // no change
+
+"Snapdragon.java" file : // for @Primary see changes by yourself
+
+"MediaTek.java" file : // for @Primary see changes by yourself
